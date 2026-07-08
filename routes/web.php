@@ -1,41 +1,139 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Session;
 
-// 1. Halaman Landing Page (Awal)
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// ==========================================
+// ROUTE PUBLIC (TANPA LOGIN)
+// ==========================================
+
 Route::get('/', function () {
-    return view('welcome'); // Mengarah ke landing page yang sudah diperbarui
-});
+    return view('welcome');
+})->name('home');
 
-// 2. Halaman Login
-Route::get('/login-test', function () {
-    return view('auth.login');
-});
-
-// 3. Halaman Dashboard
-Route::get('/dashboard-test', function () {
-    return view('dashboard');
-});
-
-// 4. Halaman Format Proposal
-Route::get('/proposal-test', function () {
-    return view('proposal.index'); // Daftar Proposal
-});
-
-Route::get('/proposal-detail-test', function () {
-    return view('proposal.show'); // Detail RAB Proposal
-});
-
-// 5. Halaman Format LPJ
-Route::get('/lpj-test', function () {
-    return view('lpj.index'); // Daftar LPJ
-});
-
-Route::get('/lpj-detail-test', function () {
-    return view('lpj.show'); // Detail RAB LPJ
-});
-
-// 6. Halaman About
-Route::get('/about-test', function () {
+Route::get('/about', function () {
     return view('about');
+})->name('about');
+
+
+// ==========================================
+// AUTH ROUTES
+// ==========================================
+
+// ✅ Login page - HANYA untuk guest (belum login)
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+});
+
+// ✅ Logout - HARUS sudah login
+Route::middleware(['auth'])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+
+// ==========================================
+// ROUTE YANG HARUS LOGIN (SEMUA ROLE)
+// ==========================================
+
+Route::middleware(['auth'])->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    // Profile
+    Route::get('/profile', function () {
+        return view('profile');
+    })->name('profile');
+});
+
+
+// ==========================================
+// ROUTE SUPERADMIN & ADMIN
+// ==========================================
+
+Route::middleware(['auth', 'role:Superadmin,Admin'])->group(function () {
+
+    Route::get('/proposal', function () {
+        return view('proposal.index');
+    })->name('proposal.index');
+
+    Route::get('/proposal/create', function () {
+        return view('proposal.create');
+    })->name('proposal.create');
+
+    Route::get('/proposal/{id}', function ($id) {
+        return view('proposal.show', compact('id'));
+    })->name('proposal.show');
+
+    Route::get('/proposal/{id}/edit', function ($id) {
+        return view('proposal.edit', compact('id'));
+    })->name('proposal.edit');
+
+    Route::get('/lpj', function () {
+        return view('lpj.index');
+    })->name('lpj.index');
+
+    Route::get('/lpj/create', function () {
+        return view('lpj.create');
+    })->name('lpj.create');
+
+    Route::get('/lpj/{id}', function ($id) {
+        return view('lpj.show', compact('id'));
+    })->name('lpj.show');
+});
+
+
+// ==========================================
+// ROUTE SUPERADMIN ONLY
+// ==========================================
+
+Route::middleware(['auth', 'role:Superadmin'])->group(function () {
+
+    Route::get('/users', function () {
+        $users = \App\Models\User::all();
+        return view('users.index', compact('users'));
+    })->name('users.index');
+
+    Route::get('/users/create', function () {
+        return view('users.create');
+    })->name('users.create');
+
+    Route::get('/users/{id}/edit', function ($id) {
+        $user = \App\Models\User::findOrFail($id);
+        return view('users.edit', compact('user'));
+    })->name('users.edit');
+
+    Route::get('/settings', function () {
+        return view('settings.index');
+    })->name('settings.index');
+
+    Route::get('/activity-logs', function () {
+        return view('logs.index');
+    })->name('logs.index');
+});
+
+
+// ==========================================
+// ROUTE USER ONLY
+// ==========================================
+
+Route::middleware(['auth', 'role:User'])->group(function () {
+
+    Route::get('/my-proposals', function () {
+        return view('user.proposals');
+    })->name('user.proposals');
+
+    Route::get('/my-lpj', function () {
+        return view('user.lpj');
+    })->name('user.lpj');
 });

@@ -2,24 +2,42 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use Carbon\Carbon;
 
-class DatabaseSeeder extends Seeder
+class UserSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Superadmin
+        User::create([
+            'Username' => 'superadmin',
+            'Password' => Hash::make('password123'),
+            'Role' => 'Superadmin',
+            'is_active' => Carbon::now(),
         ]);
+
+        // Admin
+        User::create([
+            'Username' => 'admin',
+            'Password' => Hash::make('password123'),
+            'Role' => 'Admin',
+            'is_active' => Carbon::now(),
+        ]);
+
+        // User Biasa
+        User::create([
+            'Username' => 'user',
+            'Password' => Hash::make('password123'),
+            'Role' => 'User',
+            'is_active' => Carbon::now(),
+        ]);
+
+        echo "✅ Users seeded successfully!\n";
+        echo "Superadmin: superadmin / password123\n";
+        echo "Admin: admin / password123\n";
+        echo "User: user / password123\n";
     }
 }
