@@ -30,6 +30,10 @@ Route::get('/about', function () {
 // ✅ Login page - HANYA untuk guest (belum login)
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+});
+
+// ✅ Login process - DENGAN RATE LIMITER (brute force protection)
+Route::middleware(['guest', 'throttle'])->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 });
 

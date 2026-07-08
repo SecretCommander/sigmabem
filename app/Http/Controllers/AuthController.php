@@ -21,13 +21,13 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        // ✅ Validasi: username ATAU email + password
+        // Validasi: username ATAU email + password
         $credentials = $request->validate([
-            'login' => ['required', 'string'],     // Bisa username atau email
+            'login' => ['required', 'string'],
             'password' => ['required'],
         ]);
 
-        // ✅ Cek apakah input adalah email atau username
+        // Cek apakah input adalah email atau username
         $login = $credentials['login'];
         $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'Email' : 'Username';
 
@@ -47,12 +47,18 @@ class AuthController extends Controller
                 ->withErrors(['password' => 'Password salah.']);
         }
 
+        // ✅ RESET RATE LIMITER PADA LOGIN SUKSES
+        $ip = $request->ip();
+        \Illuminate\Support\Facades\Cache::forget('login_attempts_' . $ip);
+        \Illuminate\Support\Facades\Cache::forget('login_attempts_' . $ip . '_blocked');
+
         // ✅ SIMPAN DATA USER KE SESSION
         Session::put('user_id', $user->ID_Pengguna);
         Session::put('user_username', $user->Username);
-        Session::put('user_email', $user->Email);        // ✅ Simpan email ke session
+        Session::put('user_email', $user->Email);
         Session::put('user_role', $user->Role);
         Session::put('user_login_time', now()->toDateTimeString());
+        Session::put('last_activity', time()); // ✅ Untuk session timeout
         Session::put('user_ip', $request->ip());
         Session::put('user_agent', $request->userAgent());
 
@@ -72,13 +78,13 @@ class AuthController extends Controller
         ]);
 
         // Log aktivitas
-        \Log::info("User login: {$user->Username} ({$user->Role})", [
+        \Log::info("User login SUCCESS: {$user->Username} ({$user->Role})", [
             'email' => $user->Email,
             'ip' => $request->ip(),
             'time' => now()->toDateTimeString(),
         ]);
 
-        // ✅ Redirect ke dashboard
+        // Redirect ke dashboard
         return redirect()->route('dashboard')
             ->with('success', "Selamat datang, {$user->Username}!");
     }

@@ -23,6 +23,28 @@ class Authenticate
                 ->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // ✅ SESSION TIMEOUT (30 menit tidak aktif = auto logout)
+        $lastActivity = Session::get('last_activity');
+        $timeout = 30 * 60; // 30 menit dalam detik
+
+        if ($lastActivity && (time() - $lastActivity > $timeout)) {
+            // Log auto logout
+            \Log::info("Auto logout: " . Session::get('user_username'), [
+                'reason' => 'Session timeout (30 menit)',
+                'last_activity' => date('Y-m-d H:i:s', $lastActivity),
+                'ip' => $request->ip(),
+            ]);
+
+            Session::flush();
+            Session::regenerateToken();
+
+            return redirect()->route('login')
+                ->with('error', 'Sesi berakhir karena tidak ada aktivitas selama 30 menit. Silakan login kembali.');
+        }
+
+        // Update last activity
+        Session::put('last_activity', time());
+
         return $next($request);
     }
 }

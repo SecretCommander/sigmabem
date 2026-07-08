@@ -29,6 +29,19 @@ Berikut beberapa fitur yang sudah tersedia pada project ini:
 - Tampilan dashboard yang menyesuaikan hak akses pengguna
 - Middleware untuk membatasi akses berdasarkan status login dan role
 - Halaman error dan tampilan dasar aplikasi yang lebih terorganisir
+- Autentikasi berdasarkan role: Superadmin, Admin, User
+- Session login / session-based authentication
+- Remember Me dengan cookie 30 hari
+- Password hashing menggunakan bcrypt (Hash::make)
+- Middleware role-based: auth, guest, role
+- CSRF Protection menggunakan @csrf pada form
+- Session regeneration untuk keamanan login
+- Flash messages: success, error, warning
+- Rate limiting untuk perlindungan brute force
+- Session timeout otomatis setelah 30 menit
+- Security headers untuk perlindungan XSS dan clickjacking
+- Login dengan email atau username
+- Informasi user seperti username, email, dan role disimpan di session
 
 ---
 
