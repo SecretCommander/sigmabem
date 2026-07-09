@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -161,5 +162,11 @@ class User extends Authenticatable
                 ['name' => 'Dashboard', 'route' => 'dashboard', 'icon' => '🏠'],
             ],
         };
+    }
+
+    // Relasi
+    public function kegiatan(): HasMany
+    {
+        return $this->hasMany(Kegiatan::class);
     }
 }

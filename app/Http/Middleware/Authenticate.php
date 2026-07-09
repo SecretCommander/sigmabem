@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class Authenticate
@@ -29,7 +30,7 @@ class Authenticate
 
         if ($lastActivity && (time() - $lastActivity > $timeout)) {
             // Log auto logout
-            \Log::info("Auto logout: " . Session::get('user_username'), [
+            Log::info("Auto logout: " . Session::get('user_username'), [
                 'reason' => 'Session timeout (30 menit)',
                 'last_activity' => date('Y-m-d H:i:s', $lastActivity),
                 'ip' => $request->ip(),

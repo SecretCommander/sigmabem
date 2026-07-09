@@ -1,0 +1,44 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Kegiatan;
+use App\Models\User;
+use Carbon\Carbon;
+
+class KegiatanSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // 1. Ambil data Admin yang sudah di-seed sebelumnya
+        $admin = User::where('Role', 'Admin')->first();
+
+        // 2. Buat data kegiatan jika Admin ditemukan
+        if ($admin) {
+            $dataKegiatan = [
+                [
+                    'ID_Pengguna'   => $admin->ID_Pengguna, // Mengaitkan kegiatan dengan Admin
+                    'Nama_Kegiatan' => 'Rapat Evaluasi BEM',
+                    'Tanggal_Pelaksanaan' => Carbon::now()->addDays(2),
+                    'Jenis_RAB'        => 'Tipe_A',
+                ],
+                [
+                    'ID_Pengguna'   => $admin->ID_Pengguna,
+                    'Nama_Kegiatan' => 'Seminar Teknologi 2026',
+                    'Tanggal_Pelaksanaan' => Carbon::now()->addDays(14),
+                    'Jenis_RAB'        => 'Tipe_B',
+                ]
+            ];
+
+            // 3. Masukkan ke database
+            Kegiatan::insert($dataKegiatan);
+        } else {
+            $this->command->info('User Admin belum ada! Silakan jalankan UserSeeder terlebih dahulu.');
+        }
+    }
+}

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
@@ -26,7 +27,7 @@ class CheckRole
         // Cek apakah role diizinkan
         if (!in_array($userRole, $roles)) {
             // Log unauthorized access
-            \Log::warning("Unauthorized access: {$userName} ({$userRole}) tried to access " . $request->url());
+            Log::warning("Unauthorized access: {$userName} ({$userRole}) tried to access " . $request->url());
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([

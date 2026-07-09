@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class LoginRateLimiter
@@ -37,7 +38,7 @@ class LoginRateLimiter
                 Cache::put($key . '_blocked', now()->addMinutes(15), 900);
                 Cache::forget($key);
 
-                \Log::warning("IP diblokir karena terlalu banyak percobaan login", [
+                Log::warning("IP diblokir karena terlalu banyak percobaan login", [
                     'ip' => $ip,
                     'attempts' => $attempts,
                     'blocked_until' => now()->addMinutes(15)->toDateTimeString(),
@@ -67,7 +68,7 @@ class LoginRateLimiter
                 $attempts = Cache::get($key, 0);
                 Cache::put($key, $attempts + 1, 900); // Simpan 15 menit
 
-                \Log::info("Percobaan login gagal", [
+                Log::info("Percobaan login gagal", [
                     'ip' => $ip,
                     'attempt' => $attempts + 1,
                     'input' => $request->input('login'),

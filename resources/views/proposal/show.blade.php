@@ -4,11 +4,11 @@
 
 @section('content')
     <div class="max-w-6xl mx-auto relative">
-
+        
         <!-- Top Actions & Title -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-purple-900 mb-1">RAB: SIGMA BEM</h1>
+                <h1 class="text-3xl font-bold text-purple-900 mb-1">RAB: {{ $kegiatan->Nama_Kegiatan }}</h1>
                 <p class="text-gray-500 text-sm">Rencana Anggaran Biaya — Format Proposal</p>
             </div>
             <div class="flex flex-wrap gap-2">

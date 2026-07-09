@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\KegiatanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,21 +68,16 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'role:Superadmin,Admin'])->group(function () {
 
-    Route::get('/proposal', function () {
-        return view('proposal.index');
-    })->name('proposal.index');
+    Route::get('/proposal', [KegiatanController::class, 'index'])->name('proposal.index');
 
-    Route::get('/proposal/create', function () {
-        return view('proposal.create');
-    })->name('proposal.create');
+    // Route::get('/proposal/create', function () {
+    //     return view('proposal.create');
+    // })->name('proposal.create');
 
-    Route::get('/proposal/{id}', function ($id) {
-        return view('proposal.show', compact('id'));
-    })->name('proposal.show');
-
-    Route::get('/proposal/{id}/edit', function ($id) {
-        return view('proposal.edit', compact('id'));
-    })->name('proposal.edit');
+    Route::get('/proposal/{id}/rab', [KegiatanController::class, 'show'])->name('proposal.show');
+    Route::post('/proposal', [KegiatanController::class, 'store'])->name('proposal.store');
+    Route::put('/proposal/{kegiatan}/edit', [KegiatanController::class, 'update'])->name('proposal.update');
+    Route::delete('/proposal/{kegiatan}', [KegiatanController::class, 'destroy'])->name('proposal.destroy');
 
     Route::get('/lpj', function () {
         return view('lpj.index');
@@ -134,7 +130,7 @@ Route::middleware(['auth', 'role:Superadmin'])->group(function () {
 Route::middleware(['auth', 'role:User'])->group(function () {
 
     Route::get('/my-proposals', function () {
-        return view('user.proposals');
+        return view('proposal.index');
     })->name('user.proposals');
 
     Route::get('/my-lpj', function () {
