@@ -1,9 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\KegiatanController;
+use App\Models\User;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\SieController;
+use App\Http\Controllers\BonController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +25,6 @@ Route::get('/', function () {
 Route::get('/about', function () {
     return view('about');
 })->name('about');
-
 
 // ==========================================
 // AUTH ROUTES
@@ -43,7 +45,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-
 // ==========================================
 // ROUTE YANG HARUS LOGIN (SEMUA ROLE)
 // ==========================================
@@ -61,7 +62,6 @@ Route::middleware(['auth'])->group(function () {
     })->name('profile');
 });
 
-
 // ==========================================
 // ROUTE SUPERADMIN & ADMIN
 // ==========================================
@@ -75,23 +75,29 @@ Route::middleware(['auth', 'role:Superadmin,Admin'])->group(function () {
     // })->name('proposal.create');
 
     Route::get('/proposal/{id}/rab', [KegiatanController::class, 'show'])->name('proposal.show');
+
     Route::post('/proposal', [KegiatanController::class, 'store'])->name('proposal.store');
     Route::put('/proposal/{kegiatan}/edit', [KegiatanController::class, 'update'])->name('proposal.update');
     Route::delete('/proposal/{kegiatan}', [KegiatanController::class, 'destroy'])->name('proposal.destroy');
 
-    Route::get('/lpj', function () {
-        return view('lpj.index');
-    })->name('lpj.index');
+    Route::post('/proposal/tambah-sie', [SieController::class, 'store'])->name('Sie.store');
+    Route::put('/proposal/edit-sie/{sie}', [SieController::class, 'update'])->name('Sie.update');
+    Route::delete('/proposal/hapus-sie/{sie}', [SieController::class, 'destroy'])->name('Sie.destroy');
+
+
+    Route::post('/proposal/tambah-item', [ItemController::class, 'store'])->name('Item.store');
+    Route::put('/proposal/edit-item/{item}', [ItemController::class, 'update'])->name('Item.update');
+    Route::delete('/proposal/hapus-item/{item}', [ItemController::class, 'destroy'])->name('Item.destroy');
+
+    Route::get('/lpj', [KegiatanController::class, 'index'])->name('lpj.index');
+    Route::post('/lpj/tambah-bon', [BonController::class, 'store'])->name('Bon.store');
 
     Route::get('/lpj/create', function () {
         return view('lpj.create');
     })->name('lpj.create');
 
-    Route::get('/lpj/{id}', function ($id) {
-        return view('lpj.show', compact('id'));
-    })->name('lpj.show');
+    Route::get('/lpj/{id}/rab', [KegiatanController::class, 'show'])->name('lpj.show');
 });
-
 
 // ==========================================
 // ROUTE SUPERADMIN ONLY
@@ -100,7 +106,8 @@ Route::middleware(['auth', 'role:Superadmin,Admin'])->group(function () {
 Route::middleware(['auth', 'role:Superadmin'])->group(function () {
 
     Route::get('/users', function () {
-        $users = \App\Models\User::all();
+        $users = User::all();
+
         return view('users.index', compact('users'));
     })->name('users.index');
 
@@ -109,7 +116,8 @@ Route::middleware(['auth', 'role:Superadmin'])->group(function () {
     })->name('users.create');
 
     Route::get('/users/{id}/edit', function ($id) {
-        $user = \App\Models\User::findOrFail($id);
+        $user = User::findOrFail($id);
+
         return view('users.edit', compact('user'));
     })->name('users.edit');
 
@@ -121,7 +129,6 @@ Route::middleware(['auth', 'role:Superadmin'])->group(function () {
         return view('logs.index');
     })->name('logs.index');
 });
-
 
 // ==========================================
 // ROUTE USER ONLY

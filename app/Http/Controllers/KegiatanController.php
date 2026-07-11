@@ -11,12 +11,16 @@ class KegiatanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Session::get('user_id');
 
-        $kegiatan = Kegiatan::where('ID_Pengguna', $user)->get();
+        $kegiatan = Kegiatan::where('ID_Pengguna', '=', $user, 'and')->get();
 
+        $site = $request->segment(1);
+        if ($site === 'lpj') {
+            return view('lpj.index', compact('kegiatan'));
+        }
         return view('proposal.index', compact('kegiatan'));
     }
 
@@ -54,10 +58,19 @@ class KegiatanController extends Controller
     /**
      * Display the specified resource.  
      */
-    public function show(int $id)
+    public function show(int $id, Request $request)
     {
-        $kegiatan = Kegiatan::findOrFail($id);
-        return view('proposal.show', compact('kegiatan'));
+        $kegiatan = Kegiatan::with(['sie.items','items'])->findOrFail($id);
+        $sie = $kegiatan->sie;
+
+
+        $site = $request->segment(1);
+        if ($site === 'lpj') {
+            
+            return view('lpj.show', compact('kegiatan', 'sie'));
+        }
+        return view('proposal.show', compact('kegiatan', 'sie'));
+
     }
 
     /**
@@ -95,7 +108,7 @@ class KegiatanController extends Controller
      */
     public function destroy(Kegiatan $kegiatan)
     {
-        $kegiatan->delete();
+        $kegiatan->delete($kegiatan->ID_Kegiatan);
         return redirect()->route('proposal.index')->with('success', 'Kegiatan berhasil dihapus.');
     }
 }
