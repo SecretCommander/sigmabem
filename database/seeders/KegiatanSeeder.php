@@ -16,7 +16,7 @@ class KegiatanSeeder extends Seeder
     public function run(): void
     {
         // 1. Ambil data Admin yang sudah di-seed sebelumnya
-        $admin = User::where('Role', 'Admin')->first();
+        $admin = User::where('Role', '=', 'Admin', 'and')->first();
 
         // 2. Buat data kegiatan jika Admin ditemukan
         if ($admin) {
@@ -25,13 +25,13 @@ class KegiatanSeeder extends Seeder
                     'ID_Pengguna'   => $admin->ID_Pengguna, // Mengaitkan kegiatan dengan Admin
                     'Nama_Kegiatan' => 'Rapat Evaluasi BEM',
                     'Tanggal_Pelaksanaan' => Carbon::now()->addDays(2),
-                    'Jenis_RAB'        => 'Tipe_A',
+                    'Jenis_RAB'        => 'Proposal',
                 ],
                 [
                     'ID_Pengguna'   => $admin->ID_Pengguna,
                     'Nama_Kegiatan' => 'Seminar Teknologi 2026',
                     'Tanggal_Pelaksanaan' => Carbon::now()->addDays(14),
-                    'Jenis_RAB'        => 'Tipe_B',
+                    'Jenis_RAB'        => 'LPJ',
                 ]
             ];
 
