@@ -32,7 +32,7 @@ class Sie extends Model
 
     public function item_lpj() : HasMany
     {
-        return $this->hasMany(Item::class, 'ID_Sie', 'ID_Sie');
+        return $this->hasMany(item_lpj::class, 'ID_Sie', 'ID_Sie');
     }
 
     public function bons()

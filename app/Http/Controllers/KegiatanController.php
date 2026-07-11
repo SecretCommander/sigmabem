@@ -66,7 +66,8 @@ class KegiatanController extends Controller
 
         $site = $request->segment(1);
         if ($site === 'lpj') {
-            
+            $kegiatan = Kegiatan::with(['sie.items', 'sie.item_lpj'])->findOrFail($id);
+            $sie = $kegiatan->sie;
             return view('lpj.show', compact('kegiatan', 'sie'));
         }
         return view('proposal.show', compact('kegiatan', 'sie'));

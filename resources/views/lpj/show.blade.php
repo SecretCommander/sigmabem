@@ -102,7 +102,8 @@
                             @php
                                 $no = 1;
                                 // Kelompokkan item berdasarkan ID_Bon
-                                $itemsWithBon = $s->items->whereNotNull('ID_Bon')->groupBy('ID_Bon');
+                                $itemsWithBon = $s->item_lpj->groupBy('ID_Bon');
+
                                 $itemsWithoutBon = $s->items->whereNull('ID_Bon');
                                 $hasItems = $s->items->count() > 0;
                                 $subtotalSie = 0; // Variabel untuk menghitung total aktual (RAB + LPJ)
@@ -111,27 +112,23 @@
                             @if ($hasItems)
                                 {{-- BAGIAN A: SUDAH ADA BON (TAMPILKAN DATA DARI TABEL ITEM_LPJ) --}}
                                 @foreach ($itemsWithBon as $bonId => $groupedItems)
+                                $totalBon = $groupedItems->sum('Total');
                                     @foreach ($groupedItems as $itemIndex => $item)
                                         @php
-                                            // Cari data realisasinya di tabel item_lpj
-                                            $realisasi = \App\Models\item_lpj::where('ID_Bon', $item->ID_Bon)
-                                                ->where('Keterangan', $item->Keterangan)
-                                                ->first();
-
                                             // Prioritaskan data LPJ, jika tidak ada fallback ke data Item RAB
-                                            $qtyTampil = $realisasi ? $realisasi->Qty_Realisasi : $item->Qty;
-                                            $satuanTampil = $realisasi ? $realisasi->Satuan_Realisasi : $item->Satuan;
-                                            $hargaTampil = $realisasi ? $realisasi->Harga_Realisasi : $item->Harga_Unit;
+                                            $qtyTampil = $item->Qty_Realisasi;
+                                            $satuanTampil = $item->Satuan_Realisasi;
+                                            $hargaTampil = $item->Harga_Realisasi;
                                             $totalTampil = $qtyTampil * $hargaTampil;
-
-                                            $subtotalSie += $totalTampil; // Tambahkan ke subtotal
+                                            $totalBon = $groupedItems->sum('Total_Realisasi');
+                                            $subtotalSie += $totalTampil; 
                                         @endphp
 
                                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition bg-green-50/20">
                                             <td class="px-6 py-4">{{ $no++ }}</td>
                                             <td class="px-6 py-4 font-medium text-gray-900">
                                                 {{ $item->Jenis_Pengeluaran }}
-                                                @if ($item->created_at == $item->updated_at && $realisasi)
+                                                @if ($item->created_at == $item->updated_at && $item->isNew)
                                                     <span
                                                         class="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] rounded-full">Baru</span>
                                                 @endif
@@ -165,7 +162,7 @@
                                                             </path>
                                                         </svg>
                                                         <span class="text-xs font-semibold">Lihat Bukti</span>
-                                                        Total : Rp {{ number_format($totalTampil, 0, ',', '.') }}
+                                                        Total : Rp {{ number_format($totalBon, 0, ',', '.') }}
                                                     </button>
                                                 </td>
                                             @endif

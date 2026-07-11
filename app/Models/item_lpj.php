@@ -16,6 +16,10 @@ class item_lpj extends Model
         'Keterangan', 'Qty_Realisasi', 'Satuan_Realisasi', 'Harga_Realisasi',
     ];
 
+    protected $appends = [
+        'isNew',
+    ];
+
     // 'Total' adalah generated column (Qty * Harga_Unit) yang dihitung
     // otomatis oleh database, jadi sengaja tidak dimasukkan ke $fillable.
 
@@ -35,6 +39,13 @@ class item_lpj extends Model
      * Ini memberi pesan error yang jelas di level aplikasi, sebagai
      * pelengkap composite foreign key yang sudah mengunci ini di database.
      */
+    public function getIsNewAttribute() : bool
+    {
+        $existsInItem = Item::where('ID_Bon', '=',$this->ID_Bon, 'and')->where('Jenis_Pengeluaran', $this->Jenis_Pengeluaran)->where('Keterangan', $this->Keterangan)->exists();
+
+        return ! $existsInItem;
+    }
+
     public function attachToBon(Bon $bon): self
     {
         if ($bon->ID_Sie !== $this->ID_Sie) {
@@ -48,5 +59,4 @@ class item_lpj extends Model
 
         return $this;
     }
-
 }
