@@ -133,8 +133,8 @@
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
                             required>
                             <option value="">Pilih Jenis RAB</option>
-                            <option value="Proposal">RAB 1</option>
-                            <option value="LPJ">RAB 2</option>
+                            <option value="Proposal">Proposal</option>
+                            <option value="LPJ">LPJ</option>
                         </select>
                     </div>
 
@@ -179,8 +179,8 @@
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
                             required>
                             <option value="">Pilih Jenis RAB</option>
-                            <option value="Proposal">RAB 1</option>
-                            <option value="LPJ">RAB 2</option>
+                            <option value="Proposal">Proposal</option>
+                            <option value="LPJ">LPJ</option>
                         </select>
                     </div>
 
