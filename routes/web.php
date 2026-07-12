@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\KegiatanController;
-use App\Models\User;
-use App\Http\Controllers\ItemController;
-use App\Http\Controllers\SieController;
 use App\Http\Controllers\BonController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\SieController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -84,13 +84,23 @@ Route::middleware(['auth', 'role:Superadmin,Admin'])->group(function () {
     Route::put('/proposal/edit-sie/{sie}', [SieController::class, 'update'])->name('Sie.update');
     Route::delete('/proposal/hapus-sie/{sie}', [SieController::class, 'destroy'])->name('Sie.destroy');
 
-
     Route::post('/proposal/tambah-item', [ItemController::class, 'store'])->name('Item.store');
     Route::put('/proposal/edit-item/{item}', [ItemController::class, 'update'])->name('Item.update');
     Route::delete('/proposal/hapus-item/{item}', [ItemController::class, 'destroy'])->name('Item.destroy');
 
+    Route::get('/proposal/{id}/export-pdf', [KegiatanController::class, 'exportPdfRab'])->name('proposal.export.pdf');
+    Route::get('/proposal/{id}/export-excel', [KegiatanController::class, 'exportExcelRab'])->name('proposal.export.excel');
+
     Route::get('/lpj', [KegiatanController::class, 'index'])->name('lpj.index');
     Route::post('/lpj/tambah-bon', [BonController::class, 'store'])->name('Bon.store');
+
+    Route::get('/lpj/bon/{bon}/detail', [BonController::class, 'getDetail'])->name('Bon.detail');
+
+    Route::put('/lpj/edit-bon/{bon}', [BonController::class, 'update'])->name('Bon.update');
+    Route::delete('/lpj/hapus-bon/{bon}', [BonController::class, 'destroy'])->name('Bon.destroy');
+
+    Route::get('/lpj/{id}/export-pdf', [KegiatanController::class, 'exportPdf'])->name('lpj.export.pdf');
+    Route::get('/lpj/{id}/export-excel', [KegiatanController::class, 'exportExcel'])->name('lpj.export.excel');
 
     Route::get('/lpj/create', function () {
         return view('lpj.create');

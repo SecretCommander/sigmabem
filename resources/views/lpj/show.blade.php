@@ -35,7 +35,7 @@
                 <p class="text-gray-500 text-sm">Laporan Penanggung Jawaban — Format LPJ</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button
+                <a href="{{ route('lpj.export.pdf', $kegiatan->ID_Kegiatan) }}"
                     class="bg-purple-800 hover:bg-purple-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -43,7 +43,7 @@
                         </path>
                     </svg>
                     Cetak PDF
-                </button>
+                </a>
                 <button onclick="toggleModalBon()"
                     class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@
                     </svg>
                     Tambah Item
                 </button> --}}
-                <button
+                <a href="{{ route('lpj.export.excel', $kegiatan->ID_Kegiatan) }}"
                     class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -67,7 +67,7 @@
                         </path>
                     </svg>
                     Export Excel
-                </button>
+                </a>
             </div>
         </div>
 
@@ -112,7 +112,6 @@
                             @if ($hasItems)
                                 {{-- BAGIAN A: SUDAH ADA BON (TAMPILKAN DATA DARI TABEL ITEM_LPJ) --}}
                                 @foreach ($itemsWithBon as $bonId => $groupedItems)
-                                $totalBon = $groupedItems->sum('Total');
                                     @foreach ($groupedItems as $itemIndex => $item)
                                         @php
                                             // Prioritaskan data LPJ, jika tidak ada fallback ke data Item RAB
@@ -121,7 +120,7 @@
                                             $hargaTampil = $item->Harga_Realisasi;
                                             $totalTampil = $qtyTampil * $hargaTampil;
                                             $totalBon = $groupedItems->sum('Total_Realisasi');
-                                            $subtotalSie += $totalTampil; 
+                                            $subtotalSie += $totalTampil;
                                         @endphp
 
                                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition bg-green-50/20">
@@ -152,16 +151,16 @@
                                                 <td class="px-6 py-4 text-center align-middle border-l border-gray-100"
                                                     rowspan="{{ count($groupedItems) }}">
                                                     <button type="button"
-                                                        onclick="viewKwitansi('{{ $urlFoto }}', '{{ $namaBon }}')"
-                                                        class="inline-flex flex-col items-center justify-center gap-1 text-purple-600 hover:text-purple-800 transition bg-purple-50 hover:bg-purple-100 px-3 py-2 rounded-lg">
+                                                        onclick="openEditBonModal({{ $item->bon->ID_Bon }})"
+                                                        class="inline-flex flex-col items-center justify-center gap-1 text-purple-600 hover:text-purple-800 transition bg-purple-50 hover:bg-purple-100 px-3 py-2 rounded-lg w-full">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2"
-                                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
                                                             </path>
                                                         </svg>
-                                                        <span class="text-xs font-semibold">Lihat Bukti</span>
+                                                        <span class="text-xs font-semibold">Lihat / Edit Bon</span>
                                                         Total : Rp {{ number_format($totalBon, 0, ',', '.') }}
                                                     </button>
                                                 </td>
@@ -585,165 +584,242 @@
                     </div>
                 </form>
             </div>
-
-            {{-- Modal Lihat Bukti --}}
-            <div id="lihatBuktiModal"
-                class="hidden fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-                <div
-                    class="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full flex flex-col overflow-hidden animate-fade-in-up">
-
-                    <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                        <h3 class="font-bold text-gray-800 text-lg" id="lihatBuktiTitle">Bukti Kwitansi</h3>
-                        <button onclick="closeLihatBukti()" class="text-gray-500 hover:text-red-500 transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="p-6 overflow-auto flex justify-center items-center bg-gray-200 min-h-[50vh]">
-                        <img id="lihatBuktiImage" src="" alt="Bukti Kwitansi"
-                            class="max-w-full max-h-[70vh] object-contain rounded shadow">
-                    </div>
-
-                </div>
-            </div>
-
         </div>
 
+        {{-- Modal Edit Bon --}}
+        <div id="editBonModal"
+            class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div
+                class="bg-white rounded-2xl w-full max-w-5xl shadow-xl overflow-hidden animate-fade-in-up max-h-[90vh] flex flex-col">
+
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-purple-900 text-white">
+                    <div>
+                        <h2 class="text-xl font-bold">Edit Bon & Realisasi</h2>
+                        <p class="text-xs text-purple-200">Ubah bukti kuitansi atau sesuaikan item realisasi anggaran</p>
+                    </div>
+                    <button type="button" onclick="closeEditBonModal()"
+                        class="text-purple-200 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="formEditBon" method="POST" enctype="multipart/form-data"
+                    class="flex flex-col flex-1 overflow-hidden">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 bg-gray-50">
+
+                        {{-- Kiri: Foto & Info Bon --}}
+                        <div
+                            class="md:col-span-5 bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4 h-fit">
+                            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider border-b pb-2">Detail
+                                Kuitansi</h3>
+
+                            <div>
+                                <label class="block text-gray-700 text-sm font-semibold mb-2">Nama Bon</label>
+                                <input type="text" id="edit_nama_bon" name="nama_bon" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 text-sm font-semibold mb-2">Foto Saat Ini (Biarkan kosong
+                                    jika tidak diganti)</label>
+                                <div class="flex flex-col items-center justify-center w-full relative">
+                                    <img id="edit_image_preview" src=""
+                                        class="w-full h-44 object-contain mb-2 bg-gray-100 rounded-lg border">
+                                    <input type="file" name="bukti_pembayaran" class="text-xs text-gray-500 w-full"
+                                        accept="image/*" onchange="previewEditImage(this)">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Kanan: Item List Dinamis via API --}}
+                        <div
+                            class="md:col-span-7 bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col max-h-[60vh] md:max-h-full">
+                            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider border-b pb-2 mb-3">Item
+                                Anggaran Sie</h3>
+                            <p class="text-xs text-gray-500 mb-3">Centang item yang ingin dimasukkan, hilangkan centang
+                                untuk membatalkan item dari bon ini.</p>
+
+                            <div id="edit_items_container" class="space-y-3 overflow-y-auto flex-1 pr-1">
+                                {{-- Injected by JS --}}
+                                <div class="text-center py-10 text-gray-400">
+                                    Loading items...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t border-gray-100 flex gap-3 bg-gray-50 justify-between items-center">
+                        {{-- Form Hapus Dummy yang akan di-submit via JS --}}
+                        <button type="button" onclick="confirmDeleteBon()"
+                            class="px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 font-semibold text-sm transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                </path>
+                            </svg>
+                            Hapus Bon
+                        </button>
+
+                        <div class="flex gap-2">
+                            <button type="button" onclick="closeEditBonModal()"
+                                class="px-5 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-semibold text-sm transition">
+                                Batal
+                            </button>
+                            <button type="submit"
+                                class="px-5 py-2 rounded-lg bg-purple-700 hover:bg-purple-800 text-white font-bold text-sm transition">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                {{-- Hidden form untuk hapus bon --}}
+                <form id="formDeleteBon" method="POST" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                </form>
+            </div>
+        </div>
+    </div>
 
 
-        <!-- Script Simple untuk memunculkan Modal -->
-        <script>
-            function toggleModalBon() {
-                const modal = document.getElementById('bonModal');
-                modal.classList.toggle('hidden');
 
-                if (modal.classList.contains('hidden')) {
-                    const form = document.querySelector('#bonModal form');
+    <!-- Script Simple untuk memunculkan Modal -->
+    <script>
+        function toggleModalBon() {
+            const modal = document.getElementById('bonModal');
+            modal.classList.toggle('hidden');
 
-                    // 1. Reset seluruh isi form (termasuk checkbox dan dropdown)
-                    form.reset();
+            if (modal.classList.contains('hidden')) {
+                const form = document.querySelector('#bonModal form');
 
-                    // 2. Sembunyikan dan kunci kembali seluruh field realisasi
-                    document.querySelectorAll('.realisasi-container').forEach(container => {
-                        container.classList.add('hidden');
-                    });
-                    document.querySelectorAll('.realisasi-qty, .realisasi-satuan, .realisasi-harga').forEach(input => {
-                        input.disabled = true;
-                    });
+                // 1. Reset seluruh isi form (termasuk checkbox dan dropdown)
+                form.reset();
 
-                    // 3. Reset Item Baru
-                    document.getElementById('container_item_baru').innerHTML = '';
-
-                    // 4. Reset Preview Gambar & Input File
-                    document.getElementById('image-preview').src = '#';
-                    document.getElementById('upload-text').classList.remove('hidden');
-                    document.getElementById('preview-container').classList.add('hidden');
-
-                    // 5. Tampilkan ulang semua grup sie (reset filter)
-                    document.querySelectorAll('.sie-group').forEach(group => {
-                        group.style.display = 'block';
-                    });
-                }
-            }
-
-            function previewImage(input) {
-                const uploadText = document.getElementById('upload-text');
-                const previewContainer = document.getElementById('preview-container');
-                const imagePreview = document.getElementById('image-preview');
-
-                // Jika ada file yang dipilih
-                if (input.files && input.files[0]) {
-                    const file = input.files[0];
-
-                    // Validasi opsional: pastikan file adalah gambar
-                    if (!file.type.startsWith('image/')) {
-                        alert('File yang diunggah harus berupa gambar!');
-                        input.value = ''; // Reset input
-                        return;
-                    }
-
-                    const reader = new FileReader();
-
-                    // Ketika file selesai dibaca oleh FileReader
-                    reader.onload = function(e) {
-                        // Set source gambar ke data URL hasil bacaan file
-                        imagePreview.src = e.target.result;
-
-                        // Sembunyikan teks petunjuk upload, tampilkan kontainer preview
-                        uploadText.classList.add('hidden');
-                        previewContainer.classList.remove('hidden');
-                    }
-
-                    // Baca file sebagai Data URL
-                    reader.readAsDataURL(file);
-                }
-            }
-
-            // Filter Item berdasarkan Sie yang dipilih
-            document.querySelector('select[name="sie_id"]').addEventListener('change', function() {
-                const selectedSieId = this.value;
-                const sieGroups = document.querySelectorAll('.sie-group');
-
-                sieGroups.forEach(group => {
-                    // Tampilkan semua jika dropdown kosong, atau tampilkan yang ID-nya cocok
-                    if (selectedSieId === '' || group.getAttribute('data-sie-id') === selectedSieId) {
-                        group.style.display = 'block';
-                    } else {
-                        group.style.display = 'none';
-                    }
+                // 2. Sembunyikan dan kunci kembali seluruh field realisasi
+                document.querySelectorAll('.realisasi-container').forEach(container => {
+                    container.classList.add('hidden');
                 });
-            });
+                document.querySelectorAll('.realisasi-qty, .realisasi-satuan, .realisasi-harga').forEach(input => {
+                    input.disabled = true;
+                });
 
-            function handleItemCheckbox(checkbox) {
-                const parentContainer = checkbox.closest('.border');
-                const realisasiContainer = parentContainer.querySelector('.realisasi-container');
+                // 3. Reset Item Baru
+                document.getElementById('container_item_baru').innerHTML = '';
 
-                // Ambil ketiga elemen input
-                const qtyInput = parentContainer.querySelector('.realisasi-qty');
-                const satuanInput = parentContainer.querySelector('.realisasi-satuan');
-                const hargaInput = parentContainer.querySelector('.realisasi-harga');
+                // 4. Reset Preview Gambar & Input File
+                document.getElementById('image-preview').src = '#';
+                document.getElementById('upload-text').classList.remove('hidden');
+                document.getElementById('preview-container').classList.add('hidden');
 
-                if (checkbox.checked) {
-                    realisasiContainer.classList.remove('hidden');
-
-                    // Aktifkan form agar nilainya dikirim
-                    qtyInput.disabled = false;
-                    satuanInput.disabled = false;
-                    hargaInput.disabled = false;
-
-                    // Beri nilai otomatis
-                    qtyInput.value = checkbox.getAttribute('data-qty');
-                    satuanInput.value = checkbox.getAttribute('data-satuan');
-                    hargaInput.value = checkbox.getAttribute('data-harga');
-                } else {
-                    realisasiContainer.classList.add('hidden');
-
-                    // Kunci kembali form dan kosongkan datanya
-                    qtyInput.disabled = true;
-                    satuanInput.disabled = true;
-                    hargaInput.disabled = true;
-
-                    qtyInput.value = '';
-                    satuanInput.value = '';
-                    hargaInput.value = '';
-                }
+                // 5. Tampilkan ulang semua grup sie (reset filter)
+                document.querySelectorAll('.sie-group').forEach(group => {
+                    group.style.display = 'block';
+                });
             }
+        }
 
-            document.getElementById('jumlah_item_baru').addEventListener('input', function() {
-                const container = document.getElementById('container_item_baru');
-                let count = parseInt(this.value);
+        function previewImage(input) {
+            const uploadText = document.getElementById('upload-text');
+            const previewContainer = document.getElementById('preview-container');
+            const imagePreview = document.getElementById('image-preview');
 
-                // Bersihkan isi kontainer sebelumnya
-                container.innerHTML = '';
+            // Jika ada file yang dipilih
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
 
-                if (isNaN(count) || count < 1) return;
-                if (count > 10) count = 10; // Batasi maksimal 10 item baru per bon demi performa
+                // Validasi opsional: pastikan file adalah gambar
+                if (!file.type.startsWith('image/')) {
+                    alert('File yang diunggah harus berupa gambar!');
+                    input.value = ''; // Reset input
+                    return;
+                }
 
-                for (let i = 1; i <= count; i++) {
-                    const itemBaruHtml = `
+                const reader = new FileReader();
+
+                // Ketika file selesai dibaca oleh FileReader
+                reader.onload = function(e) {
+                    // Set source gambar ke data URL hasil bacaan file
+                    imagePreview.src = e.target.result;
+
+                    // Sembunyikan teks petunjuk upload, tampilkan kontainer preview
+                    uploadText.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                }
+
+                // Baca file sebagai Data URL
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Filter Item berdasarkan Sie yang dipilih
+        document.querySelector('select[name="sie_id"]').addEventListener('change', function() {
+            const selectedSieId = this.value;
+            const sieGroups = document.querySelectorAll('.sie-group');
+
+            sieGroups.forEach(group => {
+                // Tampilkan semua jika dropdown kosong, atau tampilkan yang ID-nya cocok
+                if (selectedSieId === '' || group.getAttribute('data-sie-id') === selectedSieId) {
+                    group.style.display = 'block';
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+        });
+
+        function handleItemCheckbox(checkbox) {
+            const parentContainer = checkbox.closest('.border');
+            const realisasiContainer = parentContainer.querySelector('.realisasi-container');
+
+            // Ambil ketiga elemen input
+            const qtyInput = parentContainer.querySelector('.realisasi-qty');
+            const satuanInput = parentContainer.querySelector('.realisasi-satuan');
+            const hargaInput = parentContainer.querySelector('.realisasi-harga');
+
+            if (checkbox.checked) {
+                realisasiContainer.classList.remove('hidden');
+
+                // Aktifkan form agar nilainya dikirim
+                qtyInput.disabled = false;
+                satuanInput.disabled = false;
+                hargaInput.disabled = false;
+
+                // Beri nilai otomatis
+                qtyInput.value = checkbox.getAttribute('data-qty');
+                satuanInput.value = checkbox.getAttribute('data-satuan');
+                hargaInput.value = checkbox.getAttribute('data-harga');
+            } else {
+                realisasiContainer.classList.add('hidden');
+
+                // Kunci kembali form dan kosongkan datanya
+                qtyInput.disabled = true;
+                satuanInput.disabled = true;
+                hargaInput.disabled = true;
+
+                qtyInput.value = '';
+                satuanInput.value = '';
+                hargaInput.value = '';
+            }
+        }
+
+        document.getElementById('jumlah_item_baru').addEventListener('input', function() {
+            const container = document.getElementById('container_item_baru');
+            let count = parseInt(this.value);
+
+            // Bersihkan isi kontainer sebelumnya
+            container.innerHTML = '';
+
+            if (isNaN(count) || count < 1) return;
+            if (count > 10) count = 10; // Batasi maksimal 10 item baru per bon demi performa
+
+            for (let i = 1; i <= count; i++) {
+                const itemBaruHtml = `
             <div class="bg-white p-3 rounded-lg border border-amber-200 shadow-sm space-y-2 animate-fade-in-up">
                 <div class="text-[11px] font-bold text-amber-700 border-b pb-1 mb-2">Item Baru #${i}</div>
                 
@@ -781,75 +857,242 @@
                 </div>
             </div>
         `;
-                    container.insertAdjacentHTML('beforeend', itemBaruHtml);
+                container.insertAdjacentHTML('beforeend', itemBaruHtml);
+            }
+        });
+
+        function toggleModal(buttonElement = null) {
+            const modal = document.getElementById('itemModal');
+            modal.classList.toggle('hidden');
+
+            if (buttonElement) {
+                const sieId = buttonElement.getAttribute('data-sie-id');
+                modal.querySelector('#id_sie').value = sieId;
+            }
+        }
+
+        function editItem(buttonElement) {
+            const modal = document.getElementById('editItemModal');
+            modal.classList.remove('hidden');
+
+            // Ambil data dari atribut data-* dari tombol yang diklik
+            const itemId = buttonElement.getAttribute('data-item-id');
+            const jenisPengeluaran = buttonElement.getAttribute('data-item-jenis');
+            const keterangan = buttonElement.getAttribute('data-item-keterangan');
+            const qty = buttonElement.getAttribute('data-item-qty');
+            const satuan = buttonElement.getAttribute('data-item-satuan');
+            const hargaUnit = buttonElement.getAttribute('data-item-harga');
+
+            // Masukkan data ke dalam form
+            document.getElementById('editItemId').value = itemId;
+            document.querySelector('#editItemForm select[name="Jenis_Pengeluaran"]').value = jenisPengeluaran;
+            document.querySelector('#editItemForm input[name="Keterangan"]').value = keterangan;
+            document.querySelector('#editItemForm input[name="Qty"]').value = qty;
+            document.querySelector('#editItemForm input[name="Satuan"]').value = satuan;
+            document.querySelector('#editItemForm input[name="Harga_Unit"]').value = hargaUnit;
+
+            // Arahkan action form ke rute update. 
+            // CATATAN: Pastikan URL ini sesuai dengan route web.php kamu! 
+            // Contoh jika routenya menggunakan resource: /item/{id}
+            const form = document.getElementById('editItemForm');
+            form.action = `/proposal/edit-item/${itemId}`;
+        }
+
+        // Membuka form Bon dengan filter otomatis berdasarkan Sie yang diklik
+        function bukaBonSpesifikSie(sieId) {
+            toggleModalBon(); // Buka modalnya
+
+            // Set dropdown Sie dan trigger event change untuk memfilter list di sebelah kanan
+            const selectSie = document.querySelector('#bonModal select[name="sie_id"]');
+            if (selectSie) {
+                selectSie.value = sieId;
+                selectSie.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Variable global untuk menyimpan ID yang sedang diedit (untuk keperluan hapus)
+        let currentEditBonId = null;
+
+        function openEditBonModal(bonId) {
+            currentEditBonId = bonId;
+            const modal = document.getElementById('editBonModal');
+            const container = document.getElementById('edit_items_container');
+            const form = document.getElementById('formEditBon');
+            const deleteForm = document.getElementById('formDeleteBon');
+
+            // Tampilkan modal dan set teks loading
+            modal.classList.remove('hidden');
+            container.innerHTML = '<div class="text-center py-10 text-gray-400">Loading data...</div>';
+
+            // Sesuaikan action URL dari kedua form (Update & Delete)
+            form.action = `/lpj/edit-bon/${bonId}`;
+            deleteForm.action = `/lpj/hapus-bon/${bonId}`;
+
+            // Lakukan API Call (Fetch)
+            fetch(`/lpj/bon/${bonId}/detail`)
+                .then(response => response.json())
+                .then(data => {
+                    const bon = data.bon;
+
+                    // 1. Isi Data Dasar
+                    document.getElementById('edit_nama_bon').value = bon.Nama_Bon;
+                    document.getElementById('edit_image_preview').src = `/uploads/bon/${bon.Foto_Bon}`;
+
+                    // 2. Render List Item
+                    container.innerHTML = ''; // Kosongkan loading
+
+                    // Render item yang SUDAH terhubung (Otomatis tercentang)
+                    data.linked_items.forEach(item => {
+                        // Cari data realisasinya di array itemLpj
+                        const lpjData = data.item_lpj.find(lpj => lpj.Keterangan === item.Keterangan);
+                        const realQty = lpjData ? lpjData.Qty_Realisasi : item.Qty;
+                        const realSatuan = lpjData ? lpjData.Satuan_Realisasi : item.Satuan;
+                        const realHarga = lpjData ? lpjData.Harga_Realisasi : item.Harga_Unit;
+
+                        container.insertAdjacentHTML('beforeend', createItemHTML(item, true, realQty,
+                            realSatuan, realHarga));
+                    });
+
+                    // Render new items
+                    data.new_items_lpj.forEach(lpjItem => {
+                        container.insertAdjacentHTML('beforeend', createNewItemHTML(lpjItem, true));
+                    });
+
+                    // Render item yang TERSEDIA di Sie tersebut (Belum tercentang)
+                    data.available_items.forEach(item => {
+                        container.insertAdjacentHTML('beforeend', createItemHTML(item, false, item.Qty, item
+                            .Satuan, item.Harga_Unit));
+                    });
+
+                })
+                .catch(err => {
+                    console.error('Fetch Error:', err);
+                    container.innerHTML =
+                        '<div class="text-center py-10 text-red-500 font-bold">Gagal mengambil data! Refresh halaman.</div>';
+                });
+        }
+
+        function closeEditBonModal() {
+            document.getElementById('editBonModal').classList.add('hidden');
+        }
+
+        // Preview gambar khusus untuk modal edit
+        function previewEditImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('edit_image_preview').src = e.target.result;
                 }
-            });
-
-            function toggleModal(buttonElement = null) {
-                const modal = document.getElementById('itemModal');
-                modal.classList.toggle('hidden');
-
-                if (buttonElement) {
-                    const sieId = buttonElement.getAttribute('data-sie-id');
-                    modal.querySelector('#id_sie').value = sieId;
-                }
+                reader.readAsDataURL(input.files[0]);
             }
+        }
 
-            function editItem(buttonElement) {
-                const modal = document.getElementById('editItemModal');
-                modal.classList.remove('hidden');
-
-                // Ambil data dari atribut data-* dari tombol yang diklik
-                const itemId = buttonElement.getAttribute('data-item-id');
-                const jenisPengeluaran = buttonElement.getAttribute('data-item-jenis');
-                const keterangan = buttonElement.getAttribute('data-item-keterangan');
-                const qty = buttonElement.getAttribute('data-item-qty');
-                const satuan = buttonElement.getAttribute('data-item-satuan');
-                const hargaUnit = buttonElement.getAttribute('data-item-harga');
-
-                // Masukkan data ke dalam form
-                document.getElementById('editItemId').value = itemId;
-                document.querySelector('#editItemForm select[name="Jenis_Pengeluaran"]').value = jenisPengeluaran;
-                document.querySelector('#editItemForm input[name="Keterangan"]').value = keterangan;
-                document.querySelector('#editItemForm input[name="Qty"]').value = qty;
-                document.querySelector('#editItemForm input[name="Satuan"]').value = satuan;
-                document.querySelector('#editItemForm input[name="Harga_Unit"]').value = hargaUnit;
-
-                // Arahkan action form ke rute update. 
-                // CATATAN: Pastikan URL ini sesuai dengan route web.php kamu! 
-                // Contoh jika routenya menggunakan resource: /item/{id}
-                const form = document.getElementById('editItemForm');
-                form.action = `/proposal/edit-item/${itemId}`;
+        // Konfirmasi penghapusan Bon
+        function confirmDeleteBon() {
+            if (confirm(
+                    "Apakah Anda yakin ingin menghapus kuitansi ini secara permanen? Semua realisasi di dalamnya akan dikembalikan ke status kosong."
+                )) {
+                document.getElementById('formDeleteBon').submit();
             }
+        }
 
-            // Membuka form Bon dengan filter otomatis berdasarkan Sie yang diklik
-            function bukaBonSpesifikSie(sieId) {
-                toggleModalBon(); // Buka modalnya
+        // Fungsi helper untuk membangun HTML form item di dalam modal
+        function createItemHTML(item, isChecked, realQty, realSatuan, realHarga) {
+            const checkedAttr = isChecked ? 'checked' : '';
+            const displayClass = isChecked ? 'block' : 'hidden';
+            const disableAttr = isChecked ? '' : 'disabled';
 
-                // Set dropdown Sie dan trigger event change untuk memfilter list di sebelah kanan
-                const selectSie = document.querySelector('#bonModal select[name="sie_id"]');
-                if (selectSie) {
-                    selectSie.value = sieId;
-                    selectSie.dispatchEvent(new Event('change'));
-                }
+            // Kita panggil fungsi handleItemCheckbox yang sudah kamu punya sebelumnya,
+            // tapi kita modifikasi agar kompatibel karena elemen container-nya sedikit berbeda.
+
+            return `
+    <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition space-y-3 edit-item-card">
+        <div class="flex items-start gap-3">
+            <input type="checkbox" name="item_ids[]" value="${item.ID_Item}" ${checkedAttr}
+                class="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                data-qty="${item.Qty}" data-satuan="${item.Satuan}" data-harga="${item.Harga_Unit}"
+                onchange="toggleEditItemForm(this)">
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <p class="text-sm font-semibold text-gray-800">${item.Keterangan}</p>
+                    <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                        Rp ${new Intl.NumberFormat('id-ID').format(item.Harga_Unit * item.Qty)}
+                    </span>
+                </div>
+                <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Anggaran Asli: ${item.Qty} ${item.Satuan} @ Rp ${new Intl.NumberFormat('id-ID').format(item.Harga_Unit)}</p>
+                
+                <div class="edit-realisasi-container ${displayClass} border-t pt-2 grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Qty Realisasi</label>
+                        <input type="number" name="realisasi_qty[${item.ID_Item}]" value="${realQty}" ${disableAttr} required class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-purple-600">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Satuan</label>
+                        <input type="text" name="realisasi_satuan[${item.ID_Item}]" value="${realSatuan}" ${disableAttr} required class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-purple-600">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Harga Unit</label>
+                        <input type="number" name="realisasi_harga[${item.ID_Item}]" value="${realHarga}" ${disableAttr} required class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-purple-600">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+        }
+
+        function createNewItemHTML(lpjItem, isChecked) {
+            const checkedAttr = isChecked ? 'checked' : '';
+            const displayClass = isChecked ? 'block' : 'hidden';
+            const disableAttr = isChecked ? '' : 'disabled';
+
+            return `
+    <div class="border border-amber-200 bg-amber-50 rounded-lg p-3 hover:bg-amber-100 transition space-y-3 edit-item-card">
+        <div class="flex items-start gap-3">
+            <input type="checkbox" name="new_lpj_ids[]" value="${lpjItem.ID_Item_LPJ}" ${checkedAttr}
+                class="mt-1 w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                onchange="toggleEditItemForm(this)">
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <p class="text-sm font-semibold text-gray-800">${lpjItem.Keterangan} <span class="ml-1 px-1.5 py-0.5 bg-amber-200 text-amber-800 text-[10px] rounded-full">Item Baru</span></p>
+                    <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                        Rp ${new Intl.NumberFormat('id-ID').format(lpjItem.Harga_Realisasi * lpjItem.Qty_Realisasi)}
+                    </span>
+                </div>
+                <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Realisasi: ${lpjItem.Qty_Realisasi} ${lpjItem.Satuan_Realisasi} @ Rp ${new Intl.NumberFormat('id-ID').format(lpjItem.Harga_Realisasi)}</p>
+                
+                <div class="edit-realisasi-container ${displayClass} border-t border-amber-200 pt-2 grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Qty Realisasi</label>
+                        <input type="number" name="realisasi_qty_new[${lpjItem.ID_Item_LPJ}]" value="${lpjItem.Qty_Realisasi}" ${disableAttr} required class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-amber-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Satuan</label>
+                        <input type="text" name="realisasi_satuan_new[${lpjItem.ID_Item_LPJ}]" value="${lpjItem.Satuan_Realisasi}" ${disableAttr} required class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-amber-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Harga Unit</label>
+                        <input type="number" name="realisasi_harga_new[${lpjItem.ID_Item_LPJ}]" value="${lpjItem.Harga_Realisasi}" ${disableAttr} required class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-amber-500 bg-white">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+        }
+
+        // Logika toggle (show/hide form realisasi saat dicentang)
+        function toggleEditItemForm(checkbox) {
+            const container = checkbox.closest('.edit-item-card').querySelector('.edit-realisasi-container');
+            const inputs = container.querySelectorAll('input');
+
+            if (checkbox.checked) {
+                container.classList.remove('hidden');
+                container.classList.add('block');
+                inputs.forEach(input => input.disabled = false);
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('block');
+                inputs.forEach(input => input.disabled = true);
             }
-
-            // Menampilkan gambar bon saat text "Lihat Bukti" ditekan
-            function viewKwitansi(imageUrl, bonTitle) {
-                if (!imageUrl || imageUrl.trim() === '') {
-                    alert('Foto bukti kuitansi belum diunggah atau gagal dimuat.');
-                    return;
-                }
-
-                document.getElementById('lihatBuktiImage').src = imageUrl;
-                document.getElementById('lihatBuktiTitle').innerText = 'Kwitansi: ' + bonTitle;
-                document.getElementById('lihatBuktiModal').classList.remove('hidden');
-            }
-
-            // Menutup modal gambar bon
-            function closeLihatBukti() {
-                document.getElementById('lihatBuktiModal').classList.add('hidden');
-                document.getElementById('lihatBuktiImage').src = ''; // Clear memory
-            }
-        </script>
-    @endsection
+        }
+    </script>
+@endsection
